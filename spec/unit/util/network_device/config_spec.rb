@@ -40,7 +40,7 @@ describe Puppet::Util::NetworkDevice::Config do
       @config = Puppet::Util::NetworkDevice::Config.new
       @config.stubs(:changed?).returns(true)
       @fd = stub 'fd'
-      File.stubs(:open).yields(@fd)
+      File.stubs(:open).returns(@fd)
     end
 
     it "should skip comments" do
@@ -52,6 +52,7 @@ describe Puppet::Util::NetworkDevice::Config do
     end
 
     it "should increment line number even on commented lines" do
+      @fd.stubs(:lineno).returns(2)
       @fd.stubs(:each).multiple_yields('  # comment','[router.puppetlabs.com]')
 
       @config.read
@@ -66,6 +67,7 @@ describe Puppet::Util::NetworkDevice::Config do
     end
 
     it "should produce the correct line number" do
+      @fd.stubs(:lineno).returns(2)
       @fd.stubs(:each).multiple_yields('  ', '[router.puppetlabs.com]')
 
       @config.read
@@ -73,12 +75,14 @@ describe Puppet::Util::NetworkDevice::Config do
     end
 
     it "should throw an error if the current device already exists" do
+      @fd.stubs(:lineno).returns(1, 2)
       @fd.stubs(:each).multiple_yields('[router.puppetlabs.com]', '[router.puppetlabs.com]')
 
       lambda { @config.read }.should raise_error
     end
 
     it "should accept device certname containing dashes" do
+      @fd.stubs(:lineno).returns(1)
       @fd.stubs(:each).yields('[router-1.puppetlabs.com]')
 
       @config.read
@@ -86,6 +90,7 @@ describe Puppet::Util::NetworkDevice::Config do
     end
 
     it "should create a new device for each found device line" do
+      @fd.stubs(:lineno).returns(1, 2)
       @fd.stubs(:each).multiple_yields('[router.puppetlabs.com]', '[swith.puppetlabs.com]')
 
       @config.read
@@ -93,6 +98,7 @@ describe Puppet::Util::NetworkDevice::Config do
     end
 
     it "should parse the device type" do
+      @fd.stubs(:lineno).returns(1, 2)
       @fd.stubs(:each).multiple_yields('[router.puppetlabs.com]', 'type cisco')
 
       @config.read
@@ -100,6 +106,7 @@ describe Puppet::Util::NetworkDevice::Config do
     end
 
     it "should parse the device url" do
+      @fd.stubs(:lineno).returns(1, 2, 3)
       @fd.stubs(:each).multiple_yields('[router.puppetlabs.com]', 'type cisco', 'url ssh://test/')
 
       @config.read
@@ -107,6 +114,7 @@ describe Puppet::Util::NetworkDevice::Config do
     end
 
     it "should parse the debug mode" do
+      @fd.stubs(:lineno).returns(1, 2, 3, 4)
       @fd.stubs(:each).multiple_yields('[router.puppetlabs.com]', 'type cisco', 'url ssh://test/', 'debug')
 
       @config.read
@@ -114,6 +122,7 @@ describe Puppet::Util::NetworkDevice::Config do
     end
 
     it "should set the debug mode to false by default" do
+      @fd.stubs(:lineno).returns(1, 2, 3)
       @fd.stubs(:each).multiple_yields('[router.puppetlabs.com]', 'type cisco', 'url ssh://test/')
 
       @config.read
