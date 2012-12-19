@@ -46,7 +46,7 @@ describe Puppet::Util::NetworkDevice::Config do
     it "should skip comments" do
       @fd.stubs(:each).yields('  # comment')
 
-      OpenStruct.expects(:new).never
+      Puppet::Util::NetworkDevice::Device.expects(:new).never
 
       @config.read
     end
@@ -56,7 +56,7 @@ describe Puppet::Util::NetworkDevice::Config do
       @fd.stubs(:each).multiple_yields('  # comment','[router.puppetlabs.com]')
 
       @config.read
-      @config.devices.should be_include('router.puppetlabs.com')
+      @config.devices['router.puppetlabs.com'].line.should == 2
     end
 
     it "should skip blank lines" do
@@ -67,11 +67,12 @@ describe Puppet::Util::NetworkDevice::Config do
     end
 
     it "should produce the correct line number" do
-      @fd.stubs(:lineno).returns(2)
-      @fd.stubs(:each).multiple_yields('  ', '[router.puppetlabs.com]')
+      @fd.stubs(:lineno).returns(3)
+      @fd.stubs(:each).multiple_yields('  ', '# hello', '[router.puppetlabs.com]')
 
       @config.read
-      @config.devices['router.puppetlabs.com'].line.should == 2
+
+      @config.devices['router.puppetlabs.com'].line.should == 3
     end
 
     it "should throw an error if the current device already exists" do

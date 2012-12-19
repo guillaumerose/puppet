@@ -1,6 +1,6 @@
-require 'ostruct'
 require 'puppet/util/loadedfile'
 require 'puppet/util/network_device'
+require 'puppet/util/network_device/device'
 
 class Puppet::Util::NetworkDevice::Config < Puppet::Util::LoadedFile
 
@@ -50,13 +50,10 @@ class Puppet::Util::NetworkDevice::Config < Puppet::Util::LoadedFile
         when /^\[([\w.-]+)\]\s*$/ # [device.fqdn]
           name = $1
           name.chomp!
-          raise Puppet::Error, "Duplicate device found at line #{fd.lineno}, already found at #{device.line}" if devices.include?(name)
-          device = OpenStruct.new
-          device.name = name
-          device.line = fd.lineno
-          device.options = { :debug => false }
-          Puppet.debug "found device: #{device.name} at #{device.line}"
+          raise Puppet::Error, "Duplicate device found at line #{fd.lineno}" if devices.include?(name)
+          device = Puppet::Util::NetworkDevice::Device.new(name, fd.lineno)
           devices[name] = device
+          Puppet.debug "Found device: #{device.name} at #{device.line}"
         when /^\s*(type|url|debug)(\s+(.+))*$/
           parse_directive(device, $1, $3, fd.lineno)
         else
@@ -65,7 +62,6 @@ class Puppet::Util::NetworkDevice::Config < Puppet::Util::LoadedFile
       end
     rescue Errno::EACCES => detail
       Puppet.err "Configuration error: Cannot read #{@file}; cannot serve"
-      #raise Puppet::Error, "Cannot read #{@config}"
     rescue Errno::ENOENT => detail
       Puppet.err "Configuration error: '#{@file}' does not exit; cannot serve"
     end
@@ -80,7 +76,7 @@ class Puppet::Util::NetworkDevice::Config < Puppet::Util::LoadedFile
     when "url"
       device.url = value
     when "debug"
-      device.options[:debug] = true
+      device.debug = true
     else
       raise Puppet::Error, "Invalid argument '#{var}' at line #{count}"
     end
