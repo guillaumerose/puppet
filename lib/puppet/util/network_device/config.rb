@@ -45,9 +45,7 @@ class Puppet::Util::NetworkDevice::Config < Puppet::Util::LoadedFile
       fd = File.open(@file)
       fd.each do |line|
         case line
-        when /^\s*#/ # skip comments
-          next
-        when /^\s*$/  # skip blank lines
+        when /^\s*(#|$)/  # skip blank lines and comments
           next
         when /^\[([\w.-]+)\]\s*$/ # [device.fqdn]
           name = $1
