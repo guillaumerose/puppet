@@ -2,6 +2,7 @@ require 'puppet/util/autoload'
 require 'uri'
 require 'puppet/util/network_device/transport'
 require 'puppet/util/network_device/transport/base'
+require 'puppet/util/network_device/transport/factory'
 
 class Puppet::Util::NetworkDevice::Base
 
@@ -9,19 +10,6 @@ class Puppet::Util::NetworkDevice::Base
 
   def initialize(url, options = {})
     @url = URI.parse(url)
-
-    @autoloader = Puppet::Util::Autoload.new(
-      self,
-      "puppet/util/network_device/transport",
-      :wrap => false
-    )
-
-    if @autoloader.load(@url.scheme)
-      @transport = Puppet::Util::NetworkDevice::Transport.const_get(@url.scheme.capitalize).new(options[:debug] || false)
-      @transport.host = @url.host
-      @transport.port = @url.port || case @url.scheme ; when "ssh" ; 22 ; when "telnet" ; 23 ; end
-      @transport.user = @url.user
-      @transport.password = @url.password
-    end
+    @transport = Puppet::Util::NetworkDevice::Transport::Factory.create(@url, options[:debug])
   end
 end
