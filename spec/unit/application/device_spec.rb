@@ -304,7 +304,7 @@ describe Puppet::Application::Device do
         Puppet.settings.stubs(:set_value)
         Puppet.settings.stubs(:use)
         @device.stubs(:setup_host)
-        Puppet::Util::NetworkDevice.stubs(:init)
+        Puppet::Util::NetworkDevice::Singleton.stubs(:init)
         @configurer = stub_everything 'configurer'
         Puppet::Configurer.stubs(:new).returns(@configurer)
       end
@@ -331,7 +331,7 @@ describe Puppet::Application::Device do
       end
 
       it "should initialize the device singleton" do
-        Puppet::Util::NetworkDevice.expects(:init).with(@device_hash["device1"]).then.with(@device_hash["device2"])
+        Puppet::Util::NetworkDevice::Singleton.expects(:init).with(@device_hash["device1"]).then.with(@device_hash["device2"])
         @device.main
       end
 

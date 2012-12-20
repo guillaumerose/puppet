@@ -1,7 +1,7 @@
 #! /usr/bin/env ruby
 require 'spec_helper'
 
-require 'puppet/util/network_device'
+require 'puppet/util/network_device/singleton'
 require 'puppet/indirector/facts/network_device'
 
 describe Puppet::Node::Facts::NetworkDevice do
@@ -26,7 +26,7 @@ end
 describe Puppet::Node::Facts::NetworkDevice do
   before :each do
     @remote_device = stub 'remote_device', :facts => {}
-    Puppet::Util::NetworkDevice.stubs(:current).returns(@remote_device)
+    Puppet::Util::NetworkDevice::Singleton.stubs(:current).returns(@remote_device)
     @device = Puppet::Node::Facts::NetworkDevice.new
     @name = "me"
     @request = stub 'request', :key => @name

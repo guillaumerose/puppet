@@ -1,5 +1,6 @@
 #! /usr/bin/env ruby
 require 'spec_helper'
+require 'uri'
 
 require 'puppet/util/network_device/cisco/device'
 require 'puppet/util/network_device/transport/telnet'
@@ -7,34 +8,23 @@ require 'puppet/util/network_device/transport/telnet'
 describe Puppet::Util::NetworkDevice::Cisco::Device do
   before(:each) do
     @transport = stub_everything 'transport', :is_a? => true, :command => ""
-    @cisco = Puppet::Util::NetworkDevice::Cisco::Device.new("telnet://user:password@localhost:23/")
-    @cisco.transport = @transport
+    @cisco = Puppet::Util::NetworkDevice::Cisco::Device.new(URI.parse("telnet://user:password@localhost:23/"), @transport)
   end
 
   describe "when creating the device" do
     it "should find the enable password from the url" do
-      cisco = Puppet::Util::NetworkDevice::Cisco::Device.new("telnet://user:password@localhost:23/?enable=enable_password")
+      cisco = Puppet::Util::NetworkDevice::Cisco::Device.new(URI.parse("telnet://user:password@localhost:23/?enable=enable_password"), @transport)
       cisco.enable_password.should == "enable_password"
     end
 
     it "should find the enable password from the url with a sharp" do
-      cisco = Puppet::Util::NetworkDevice::Cisco::Device.new("telnet://user:password@localhost:23/?enable=enable_password#with_a_sharp")
+      cisco = Puppet::Util::NetworkDevice::Cisco::Device.new(URI.parse("telnet://user:password@localhost:23/?enable=enable_password#with_a_sharp"), @transport)
       cisco.enable_password.should == "enable_password#with_a_sharp"
     end
 
     it "should find the enable password from the options" do
-      cisco = Puppet::Util::NetworkDevice::Cisco::Device.new("telnet://user:password@localhost:23/?enable=enable_password", :enable_password => "mypass")
+      cisco = Puppet::Util::NetworkDevice::Cisco::Device.new(URI.parse("telnet://user:password@localhost:23/?enable=enable_password"), @transport, :enable_password => "mypass")
       cisco.enable_password.should == "mypass"
-    end
-
-    it "should find the debug mode from the options" do
-      Puppet::Util::NetworkDevice::Transport::Telnet.expects(:new).with(true).returns(@transport)
-      cisco = Puppet::Util::NetworkDevice::Cisco::Device.new("telnet://user:password@localhost:23", :debug => true)
-    end
-
-    it "should set the debug mode to false by default" do
-      Puppet::Util::NetworkDevice::Transport::Telnet.expects(:new).with(false).returns(@transport)
-      cisco = Puppet::Util::NetworkDevice::Cisco::Device.new("telnet://user:password@localhost:23")
     end
   end
 
@@ -138,7 +128,7 @@ describe Puppet::Util::NetworkDevice::Cisco::Device do
 
     it "should detect errors" do
       @transport.stubs(:command).with("sh vlan brief").returns(<<eos)
-Switch#sh vlan brief  
+Switch#sh vlan brief
 % Ambiguous command:  "sh vlan brief"
 Switch#
 eos

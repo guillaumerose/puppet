@@ -111,7 +111,7 @@ describe Puppet::Util::NetworkDevice::Config do
       @fd.stubs(:each).multiple_yields('[router.puppetlabs.com]', 'type cisco', 'url ssh://test/')
 
       @config.read
-      @config.devices['router.puppetlabs.com'].url.should == 'ssh://test/'
+      @config.devices['router.puppetlabs.com'].url.to_s.should == 'ssh://test/'
     end
 
     it "should parse the debug mode" do

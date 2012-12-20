@@ -1,5 +1,5 @@
+require 'puppet/util/network_device/singleton'
 
-# This is the base class of all prefetched network device provider
 class Puppet::Provider::NetworkDevice < Puppet::Provider
 
   def self.device(url)
@@ -12,7 +12,7 @@ class Puppet::Provider::NetworkDevice < Puppet::Provider
 
   def self.prefetch(resources)
     resources.each do |name, resource|
-      device = Puppet::Util::NetworkDevice.current || device(resource[:device_url])
+      device = Puppet::Util::NetworkDevice::Singleton.current || device(resource[:device_url])
       if result = lookup(device, name)
         result[:ensure] = :present
         resource.provider = new(device, result)

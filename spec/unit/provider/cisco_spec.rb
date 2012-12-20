@@ -9,7 +9,9 @@ describe Puppet::Provider::Cisco do
   end
 
   it "should create a cisco device instance" do
-    Puppet::Util::NetworkDevice::Cisco::Device.expects(:new).returns :device
-    Puppet::Provider::Cisco.device(:url).should == :device
+    device = stub 'device'
+    Puppet::Util::NetworkDevice::Transport::Factory.expects(:create)
+    Puppet::Util::NetworkDevice::Cisco::Device.expects(:new).returns device
+    Puppet::Provider::Cisco.device("telnet://127.0.0.1").should == device
   end
 end

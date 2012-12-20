@@ -6,7 +6,7 @@ class Puppet::Node::Facts::NetworkDevice < Puppet::Indirector::Code
 
   # Look a device's facts up through the current device.
   def find(request)
-    result = Puppet::Node::Facts.new(request.key, Puppet::Util::NetworkDevice.current.facts)
+    result = Puppet::Node::Facts.new(request.key, Puppet::Util::NetworkDevice::Singleton.current.facts)
 
     result.add_local_facts
     result.stringify

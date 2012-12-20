@@ -1,6 +1,9 @@
+require 'uri'
+require 'puppet/util/network_device'
+
 class Puppet::Util::NetworkDevice::Device
-  attr_reader :name, :line, :options
-  attr_accessor :provider, :url
+  attr_reader :name, :line, :options, :url
+  attr_accessor :provider
 
   def initialize(name, line)
     @name = name
@@ -10,5 +13,9 @@ class Puppet::Util::NetworkDevice::Device
 
   def debug=(boolean)
     @options[:debug] = boolean
+  end
+
+  def url=(string)
+    @url = URI.parse(string)
   end
 end

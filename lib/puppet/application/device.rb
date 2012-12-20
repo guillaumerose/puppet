@@ -1,5 +1,5 @@
 require 'puppet/application'
-require 'puppet/util/network_device'
+require 'puppet/util/network_device/singleton'
 
 
 class Puppet::Application::Device < Puppet::Application
@@ -187,7 +187,7 @@ Licensed under the Apache 2.0 License
 
         # this init the device singleton, so that the facts terminus
         # and the various network_device provider can use it
-        Puppet::Util::NetworkDevice.init(device)
+        Puppet::Util::NetworkDevice::Singleton.init(device)
 
         # ask for a ssl cert if needed, but at least
         # setup the ssl system for this device.
