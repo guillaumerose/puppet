@@ -2,12 +2,7 @@ require 'puppet/util/network_device/transport'
 
 class Puppet::Util::NetworkDevice::Transport::Factory
   def self.create(url, debug = false)
-    autoloader = Puppet::Util::Autoload.new(
-      self,
-      "puppet/util/network_device/transport",
-      :wrap => false
-    )
-    autoloader.load url.scheme
+    require "puppet/util/network_device/transport/#{url.scheme}"
 
     transport = Puppet::Util::NetworkDevice::Transport.const_get(url.scheme.capitalize).new(debug)
     transport.host = url.host
